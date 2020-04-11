@@ -64,8 +64,6 @@ ax[1].set_xlabel('Time')
 
 ax[1].set_ylabel('Tilt')
 
-#print(tilt)
-
 plt.show()
 
 s.close()
