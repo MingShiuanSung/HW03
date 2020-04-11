@@ -60,6 +60,7 @@ void FXOS8700CQ_readRegs(int addr, uint8_t * data, int len);
 
 void FXOS8700CQ_writeRegs(uint8_t * data, int len);
 
+void logger();
 
 
 int main() {
@@ -68,15 +69,15 @@ int main() {
    pc.baud(115200);
 
 
-   uint8_t who_am_i, data[2], res[6];
+   uint8_t data[2];
 
-   int16_t acc16;
 
-   float t[3];
+   // creates a queue with the default size
+
+   EventQueue queue;
 
 
    // Enable the FXOS8700Q
-
 
    FXOS8700CQ_readRegs( FXOS8700Q_CTRL_REG1, &data[1], 1);
 
@@ -92,83 +93,18 @@ int main() {
 
       if( Switch == 0 ) {
 
-         float x_acc[100];
+         redLED = 0;
 
-         float y_acc[100];
+         queue.call(logger);
 
-         float z_acc[100];
-
-         for (int i = 0; i < 100; ++i) {
-
-            redLED = 0;
-
-            FXOS8700CQ_readRegs(FXOS8700Q_OUT_X_MSB, res, 6);
-
-
-            acc16 = (res[0] << 6) | (res[1] >> 2);
-
-            if (acc16 > UINT14_MAX/2)
-
-               acc16 -= UINT14_MAX;
-
-            t[0] = ((float)acc16) / 4096.0f;
-
-
-            acc16 = (res[2] << 6) | (res[3] >> 2);
-
-            if (acc16 > UINT14_MAX/2)
-
-               acc16 -= UINT14_MAX;
-
-            t[1] = ((float)acc16) / 4096.0f;
-
-
-            acc16 = (res[4] << 6) | (res[5] >> 2);
-
-            if (acc16 > UINT14_MAX/2)
-
-               acc16 -= UINT14_MAX;
-
-            t[2] = ((float)acc16) / 4096.0f;
-
-            x_acc[i] = t[0];
-
-            y_acc[i] = t[1];
-
-            z_acc[i] = t[2];
-
-            wait(0.1);
-
-         }
-
-         for (int i = 0; i < 100; i++) {
-            pc.printf("%1.4f\r\n", x_acc[i]);
-            wait(0.01);
-         }
-
-         for (int i = 0; i < 100; i++) {
-            pc.printf("%1.4f\r\n", y_acc[i]);
-            wait(0.01);
-         }
-
-         for (int i = 0; i < 100; i++) {
-            pc.printf("%1.4f\r\n", z_acc[i]);
-            wait(0.01);
-         }
-
-         for (int i = 0; i < 100; i++) {
-            if (y_acc[i] > 0.5 || y_acc[i] < -0.5)
-               pc.printf("1.0000\r\n");
-            else
-               pc.printf("0.0000\r\n");
-            
-            wait(0.01);
-         }
+         queue.dispatch(10000);
 
       }
 
       else{
+
          redLED = 1;
+
       }
 
    }
@@ -191,4 +127,84 @@ void FXOS8700CQ_writeRegs(uint8_t * data, int len) {
 
    i2c.write(m_addr, (char *)data, len);
 
+}
+
+void logger() {
+
+   uint8_t res[6];
+
+   int16_t acc16;
+
+   float t[3];
+
+   float x_acc[100];
+
+   float y_acc[100];
+
+   float z_acc[100];
+
+   for (int i = 0; i < 100; ++i) {
+
+      FXOS8700CQ_readRegs(FXOS8700Q_OUT_X_MSB, res, 6);
+
+
+      acc16 = (res[0] << 6) | (res[1] >> 2);
+
+      if (acc16 > UINT14_MAX/2)
+
+         acc16 -= UINT14_MAX;
+
+      t[0] = ((float)acc16) / 4096.0f;
+
+
+      acc16 = (res[2] << 6) | (res[3] >> 2);
+
+      if (acc16 > UINT14_MAX/2)
+
+         acc16 -= UINT14_MAX;
+
+      t[1] = ((float)acc16) / 4096.0f;
+
+
+      acc16 = (res[4] << 6) | (res[5] >> 2);
+
+      if (acc16 > UINT14_MAX/2)
+
+         acc16 -= UINT14_MAX;
+
+      t[2] = ((float)acc16) / 4096.0f;
+
+      x_acc[i] = t[0];
+
+      y_acc[i] = t[1];
+
+      z_acc[i] = t[2];
+
+      wait(0.1);
+
+   }
+
+   for (int i = 0; i < 100; i++) {
+      pc.printf("%1.4f\r\n", x_acc[i]);
+      wait(0.01);
+   }
+
+   for (int i = 0; i < 100; i++) {
+      pc.printf("%1.4f\r\n", y_acc[i]);
+      wait(0.01);
+   }
+
+   for (int i = 0; i < 100; i++) {
+      pc.printf("%1.4f\r\n", z_acc[i]);
+      wait(0.01);
+   }
+
+   for (int i = 0; i < 100; i++) {
+      if (y_acc[i] > 0.5 || y_acc[i] < -0.5)
+         pc.printf("1.0000\r\n");
+      else
+         pc.printf("0.0000\r\n");
+      
+      wait(0.01);
+   }
 }

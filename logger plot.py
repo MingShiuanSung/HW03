@@ -58,7 +58,7 @@ ax[0].set_ylabel('Acc Vector')
 
 ax[0].legend(loc = 'lower left')
 
-ax[1].stem(t, tilt)
+ax[1].stem(t, tilt, use_line_collection = True)
 
 ax[1].set_xlabel('Time')
 
