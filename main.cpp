@@ -200,7 +200,7 @@ void logger() {
    }
 
    for (int i = 0; i < 100; i++) {
-      if (y_acc[i] > 0.5 || y_acc[i] < -0.5)
+      if (y_acc[i] > 0.5 || y_acc[i] < -0.5 || x_acc[i] > 0.5 || x_acc[i] < -0.5)
          pc.printf("1.0000\r\n");
       else
          pc.printf("0.0000\r\n");
