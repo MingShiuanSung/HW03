@@ -62,6 +62,8 @@ void FXOS8700CQ_writeRegs(uint8_t * data, int len);
 
 void logger();
 
+void red_led();
+
 
 int main() {
 
@@ -93,7 +95,7 @@ int main() {
 
       if( Switch == 0 ) {
 
-         redLED = 0;
+         queue.call(red_led);
 
          queue.call(logger);
 
@@ -207,4 +209,15 @@ void logger() {
       
       wait(0.01);
    }
+}
+
+void red_led() {
+
+   redLED = 0;
+
+   wait(0.1);
+
+   redLED = 1;
+   
+   wait(0.1);
 }
